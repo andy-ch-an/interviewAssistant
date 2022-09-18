@@ -1,51 +1,78 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import '../../init'
+import Loader from './Loader'
+import { v4 } from 'uuid'
+import AWS from 'aws-sdk'
+AWS.config.update({
+    "accessKeyId": "",
+    "secretAccessKey": "",
+    "region": "ap-southeast-1"
+})
 
 const Record = () => {
     const [start, setStart] = useState(false)
     const [count, setCount] = useState(5)
     const [isRecord, setIsRecord] = useState(false)
+    const [isFinish, setIsFinish] = useState(false)
+    const videoRef = useRef()
+
+    const S3 = new AWS.S3({ region: "ap-southeast-1" })
+
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    }, [])
     useEffect(() => {
         (count > 0 && start) && setTimeout(() => {
             setCount(preCount => preCount - 1)
         }, 1000);
         if (count === 0) {
             setIsRecord(true)
-            console.log('start record')
+            console.log('start recording')
         }
     }, [count, start])
-    const handleDataAvailable = (e) => {
+    const handleDataAvailable = async (e) => {
         if (e.data.size) {
-            const blob = new Blob([e.data], {
+            const vod = new Blob([e.data], {
                 type: "video/webm"
-              });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              document.body.appendChild(a);
-              a.style = "display: none";
-              a.href = url;
-              a.download = "test.webm";
-              a.click();
-              window.URL.revokeObjectURL(url);
+            });
+            const params = {
+                Body: vod,
+                ContentType: 'video/webm',
+                Bucket: 'interview-assistant-vod',
+                Key: v4() + ".webm"
+            }
+            const recording =document.querySelector('video')
+            recording.src = URL.createObjectURL(vod);
+            // const message = await S3.upload(params).promise()
+            // console.log(message)
+            // const a = document.createElement("a");
+            // document.body.appendChild(a);
+            // a.style = "display: none";
+            // a.href = url;
+            // a.download = "test.webm";
+            // a.click();
+            // window.URL.revokeObjectURL(url);
         }
-        console.log(e)
+        // console.log(e)
     }
     useEffect(() => {
         if (isRecord) {
             const canvas = document.querySelector("canvas")
             const stream = canvas.captureStream(25)
             const option = { mimeType: "video/webm; codecs=vp9" }
-            navigator.mediaDevices.getUserMedia({ audio: true, video:true}).then((stream) => {
+            navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(async (stream) => {
                 const mediaRecorder = new MediaRecorder(stream, option)
-                // visualize(stream)
-                
+                let video = videoRef.current
+                video.srcObject = stream
                 mediaRecorder.ondataavailable = handleDataAvailable;
                 mediaRecorder.start()
-                setTimeout(() => {
-                    mediaRecorder.stop()
-                }, 10000);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                mediaRecorder.stop()
+                stream.getTracks().forEach((track)=>track.stop())
+                setIsFinish(true)
+                console.log('finish recording')
             })
-
-
+            
 
         }
     }, [isRecord])
@@ -62,8 +89,13 @@ const Record = () => {
                     {count}
                 </div>
             }
-            {isRecord &&
+            {isRecord && !isFinish && <>
+                <video ref={videoRef} className="m-auto mt-[calc((100vh-480px)/2)]" autoPlay muted></video>
                 <canvas></canvas>
+            </>
+            }
+            {isFinish && /*<Loader></Loader>*/
+                <video id='recording'></video>
             }
         </>
     )
