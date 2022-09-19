@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3-hexbin.v0.2.min.js"></script>
+<script>
+
+// Use <canvas>
+
+// Define points for hexagon
+// Keep adding points, for repeated points they will automatically become darker by count
+// Can add weighted (e.g. 1 distance neighbour hexagons and center)
+// Can change the data type also 
+var points = [[100,211], [100,14],  [100,14], [100,14],  [100,14], [100,211], [100,211], [5,124], [124,124], [54,645], [653,65], [135,658], [945,211]];
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+// var delta = 0.001,
+//     i = 0, j,
+//     n = 2000, // Total number of random points.
+//     k = 20; // Number of points to replace per frame.
+
+// // Set the points 
+// var rx = d3.randomNormal(width / 2, 80),
+//     ry = d3.randomNormal(height / 2, 80),
+//     points = d3.range(n).map(function() { return [rx(), ry()]; });
+//     console.log(points);
+
+// Scaling color for hexbin
+var color = d3.scaleSequential(d3.interpolateLab("white", "steelblue"))
+    .domain([0, 20]);
+
+// Construct hexbin generator
+var hexbin = d3.hexbin()
+    .radius(20)
+    .extent([[0, 0], [width, height]]);
+
+// Data points
+var hexagon = svg.selectAll("path")
+  .data(hexbin(points))
+  .enter().append("path")
+    // Create hexagon shape
+    .attr("d", hexbin.hexagon(19.5))
+    // Shift to position
+    .attr("transform", function(d) { console.log(d); return "translate(" + d.x + "," + d.y + ")"; })
+    // Value to set the color of hexagon
+    // Can change the color() argument - currently it is the count
+    .attr("fill", function(d) { return color(d.length); });
+
+d3.timer(function(elapsed) {
+
+
+  hexagon = hexagon
+    .data(hexbin(points), function(d) { return d.x + "," + d.y; });
+
+  //hexagon.exit().remove();
+
+  hexagon = hexagon.enter().append("path")
+      .attr("d", hexbin.hexagon(19.5))
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .merge(hexagon)
+      .attr("fill", function(d) { return color(d.length); });
+
+});
+
+</script>
