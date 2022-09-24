@@ -3,6 +3,8 @@ import '../../init'
 import Loader from './Loader'
 import { v4 } from 'uuid'
 import AWS from 'aws-sdk'
+import { getElementAtEvent } from "react-chartjs-2"
+import LineChart from "./LineChart"
 AWS.config.update({
     "accessKeyId": "",
     "secretAccessKey": "",
@@ -15,7 +17,8 @@ const Record = () => {
     const [isRecord, setIsRecord] = useState(false)
     const [isFinish, setIsFinish] = useState(false)
     const videoRef = useRef()
-
+    const [src, setSrc] = useState()
+    const [currentTime, setCurrentTime] = useState(0)
     const S3 = new AWS.S3({ region: "ap-southeast-1" })
 
     useEffect(() => {
@@ -30,6 +33,7 @@ const Record = () => {
             console.log('start recording')
         }
     }, [count, start])
+
     const handleDataAvailable = async (e) => {
         if (e.data.size) {
             const vod = new Blob([e.data], {
@@ -41,8 +45,8 @@ const Record = () => {
                 Bucket: 'interview-assistant-vod',
                 Key: v4() + ".webm"
             }
-            const recording =document.querySelector('video')
-            recording.src = URL.createObjectURL(vod);
+            let url = URL.createObjectURL(vod)
+            setSrc(url)
             // const message = await S3.upload(params).promise()
             // console.log(message)
             // const a = document.createElement("a");
@@ -53,7 +57,7 @@ const Record = () => {
             // a.click();
             // window.URL.revokeObjectURL(url);
         }
-        // console.log(e)
+        console.log(e)
     }
     useEffect(() => {
         if (isRecord) {
@@ -66,14 +70,12 @@ const Record = () => {
                 video.srcObject = stream
                 mediaRecorder.ondataavailable = handleDataAvailable;
                 mediaRecorder.start()
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 mediaRecorder.stop()
-                stream.getTracks().forEach((track)=>track.stop())
                 setIsFinish(true)
+                stream.getTracks().forEach((track) => track.stop())
                 console.log('finish recording')
             })
-            
-
         }
     }, [isRecord])
 
@@ -95,7 +97,12 @@ const Record = () => {
             </>
             }
             {isFinish && /*<Loader></Loader>*/
-                <video id='recording'></video>
+                <>
+                <video width={400} controls id='recording' onTimeUpdate={e => setCurrentTime(e.target.currentTime)}>
+                    <source src={src} type='video/webm'></source>
+                </video>
+                <LineChart></LineChart>
+                </>
             }
         </>
     )

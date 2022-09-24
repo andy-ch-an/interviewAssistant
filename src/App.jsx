@@ -1,6 +1,7 @@
 import Record from "./component/Record"
 import FaceApi from "./component/FaceApi"
 import Loader from "./component/Loader"
+import LineChart from "./component/LineChart"
 
 function App() {
   return(
@@ -8,6 +9,7 @@ function App() {
       <Record></Record>
       {/* <FaceApi></FaceApi> */}
       {/* <Loader></Loader> */}
+      {/* <LineChart></LineChart> */}
     </>
   )
 }
