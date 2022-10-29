@@ -1,7 +1,7 @@
 import Record from "./component/Record"
 import FaceApi from "./component/FaceApi"
 import Loader from "./component/Loader"
-import LineChart from "./component/LineChart"
+import EmotionLineChart from "./component/EmotionLineChart"
 
 function App() {
   return(
@@ -9,7 +9,7 @@ function App() {
       <Record></Record>
       {/* <FaceApi></FaceApi> */}
       {/* <Loader></Loader> */}
-      {/* <LineChart></LineChart> */}
+      {/* <EmotionLineChart></EmotionLineChart> */}
     </>
   )
 }

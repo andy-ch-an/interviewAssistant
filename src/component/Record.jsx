@@ -3,8 +3,7 @@ import '../../init'
 import Loader from './Loader'
 import { v4 } from 'uuid'
 import AWS from 'aws-sdk'
-import { getElementAtEvent } from "react-chartjs-2"
-import LineChart from "./LineChart"
+import EmotionLineChart from "./EmotionLineChart"
 AWS.config.update({
     "accessKeyId": "",
     "secretAccessKey": "",
@@ -20,6 +19,9 @@ const Record = () => {
     const [src, setSrc] = useState()
     const [currentTime, setCurrentTime] = useState(0)
     const S3 = new AWS.S3({ region: "ap-southeast-1" })
+    let audioScr = useRef()
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    // let analyser = audioContext.createAnalyser();
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ audio: true, video: true })
@@ -47,6 +49,34 @@ const Record = () => {
             }
             let url = URL.createObjectURL(vod)
             setSrc(url)
+            // analyser.fftSize = 2048;
+
+            // const bufferLength = analyser.frequencyBinCount;
+            // const dataArray = new Uint8Array(bufferLength);
+            // analyser.getByteTimeDomainData(dataArray);
+
+            let arrayBuf = await new Response(vod).arrayBuffer()
+            let audioBuf = await audioContext.decodeAudioData(arrayBuf)
+            
+            let offline = new OfflineAudioContext(2, audioBuf.length, 44100)
+            audioScr = offline.createBufferSource()
+            audioScr.buffer = audioBuf
+            let analyser = offline.createAnalyser()
+            analyser.fftSize
+            let scp = offline.createScriptProcessor(analyser.fftSize, 2, 2)
+            audioScr.connect(analyser)
+            scp.connect(offline.destination)
+            let freqData = new Uint8Array(analyser.frequencyBinCount)
+            scp.onaudioprocess = function () {
+                analyser.getByteFrequencyData(freqData);
+                console.log(freqData);
+            };
+            audioScr.start(0);
+            offline.oncomplete = function (e) {
+                console.log('analysed');
+            };
+            await offline.startRendering();
+
             // const message = await S3.upload(params).promise()
             // console.log(message)
             // const a = document.createElement("a");
@@ -98,10 +128,13 @@ const Record = () => {
             }
             {isFinish && /*<Loader></Loader>*/
                 <>
-                <video width={400} controls id='recording' onTimeUpdate={e => setCurrentTime(e.target.currentTime)}>
-                    <source src={src} type='video/webm'></source>
-                </video>
-                <LineChart></LineChart>
+                    <video width={400} controls id='recording' onTimeUpdate={e => setCurrentTime(e.target.currentTime)}>
+                        <source src={src} type='video/webm'></source>
+                    </video>
+                    <audio width={400} controls id='audio'>
+                        <source src={src}></source>
+                    </audio>
+                    <EmotionLineChart></EmotionLineChart>
                 </>
             }
         </>
