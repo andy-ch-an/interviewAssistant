@@ -4,6 +4,7 @@ import Loader from './Loader'
 import { v4 } from 'uuid'
 import AWS from 'aws-sdk'
 import EmotionLineChart from "./EmotionLineChart"
+import FreqChart from "./FreqChart"
 AWS.config.update({
     "accessKeyId": "",
     "secretAccessKey": "",
@@ -21,7 +22,9 @@ const Record = () => {
     const S3 = new AWS.S3({ region: "ap-southeast-1" })
     let audioScr = useRef()
     let audioContext = new (window.AudioContext || window.webkitAudioContext)()
+    const [freq, setFreq] = useState([])
     // let analyser = audioContext.createAnalyser();
+
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ audio: true, video: true })
@@ -49,11 +52,13 @@ const Record = () => {
             }
             let url = URL.createObjectURL(vod)
             setSrc(url)
-            // analyser.fftSize = 2048;
+            
 
             // const bufferLength = analyser.frequencyBinCount;
             // const dataArray = new Uint8Array(bufferLength);
             // analyser.getByteTimeDomainData(dataArray);
+            
+            
 
             let arrayBuf = await new Response(vod).arrayBuffer()
             let audioBuf = await audioContext.decodeAudioData(arrayBuf)
@@ -62,20 +67,24 @@ const Record = () => {
             audioScr = offline.createBufferSource()
             audioScr.buffer = audioBuf
             let analyser = offline.createAnalyser()
-            analyser.fftSize
+            
             let scp = offline.createScriptProcessor(analyser.fftSize, 2, 2)
             audioScr.connect(analyser)
             scp.connect(offline.destination)
             let freqData = new Uint8Array(analyser.frequencyBinCount)
             scp.onaudioprocess = function () {
-                analyser.getByteFrequencyData(freqData);
-                console.log(freqData);
+                analyser.getByteFrequencyData(freqData)
+                let temp = Array.from(freqData);
+                setFreq(pre=>[...pre,temp]);
             };
             audioScr.start(0);
             offline.oncomplete = function (e) {
                 console.log('analysed');
             };
             await offline.startRendering();
+            
+
+
 
             // const message = await S3.upload(params).promise()
             // console.log(message)
@@ -135,6 +144,7 @@ const Record = () => {
                         <source src={src}></source>
                     </audio>
                     <EmotionLineChart></EmotionLineChart>
+                    <FreqChart freq={freq} currentTime={currentTime}></FreqChart>
                 </>
             }
         </>
