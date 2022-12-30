@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import '../../init'
 import Loader from './Loader'
+import FaceApi from "./FaceApi"
 import { v4 } from 'uuid'
 import AWS from 'aws-sdk'
 import EmotionLineChart from "./EmotionLineChart"
@@ -13,7 +14,7 @@ AWS.config.update({
 
 const Record = () => {
     const [start, setStart] = useState(false)
-    const [count, setCount] = useState(5)
+    const [count, setCount] = useState(1)
     const [isRecord, setIsRecord] = useState(false)
     const [isFinish, setIsFinish] = useState(false)
     const videoRef = useRef()
@@ -52,12 +53,6 @@ const Record = () => {
             }
             let url = URL.createObjectURL(vod)
             setSrc(url)
-            
-
-            // const bufferLength = analyser.frequencyBinCount;
-            // const dataArray = new Uint8Array(bufferLength);
-            // analyser.getByteTimeDomainData(dataArray);
-            
             
 
             let arrayBuf = await new Response(vod).arrayBuffer()
@@ -109,7 +104,7 @@ const Record = () => {
                 video.srcObject = stream
                 mediaRecorder.ondataavailable = handleDataAvailable;
                 mediaRecorder.start()
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 120000));
                 mediaRecorder.stop()
                 setIsFinish(true)
                 stream.getTracks().forEach((track) => track.stop())
@@ -118,11 +113,13 @@ const Record = () => {
         }
     }, [isRecord])
 
+
     return (
         <>
             {!start && <>
-                
-                <button onClick={() => setStart(true)} className="mt-8 rounded-md bg-lightRed w-52 h-12 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-sky-500 mt-3 m-auto block">Start Hacking</button>
+                <h2 className="text-3xl text-center m-10">Instruction</h2>
+                <p className="text-xl mt-3 w-[65%] m-auto">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Delectus quaerat reiciendis maiores nostrum tempore dolorum, iusto rem, adipisci architecto totam ipsa possimus. Eius, quisquam! Modi aspernatur, exercitationem unde aliquam iusto ex numquam, odit maxime consectetur dolore molestias rem ratione voluptatem nemo quia. Eius minus itaque, veritatis corporis quod voluptatibus maiores delectus totam quos ad atque ratione eaque vitae at nihil non provident nulla officiis adipisci. Sed aut odio nemo et eligendi est laboriosam quas suscipit dolores, quod voluptatibus ipsa vel eum? Distinctio culpa molestiae quia accusamus, molestias incidunt cumque nesciunt ea quibusdam modi nulla neque, dolore enim tempore! Veritatis, ad. </p>
+                <button onClick={() => setStart(true)} className="rounded-md bg-sky-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-sky-500 mt-3 m-auto block">Start</button>
             </>}
             {start && !isRecord &&
                 <div className="h-[100vh] text-center align-middle text-9xl leading-[100vh]">
@@ -131,7 +128,9 @@ const Record = () => {
             }
             {isRecord && !isFinish && <>
                 <video ref={videoRef} className="m-auto mt-[calc((100vh-480px)/2)]" autoPlay muted></video>
-                <canvas></canvas>
+                {/* <canvas></canvas> */}
+                <FaceApi/>
+                <button>Done!</button>
             </>
             }
             {isFinish && /*<Loader></Loader>*/
@@ -142,7 +141,7 @@ const Record = () => {
                     <audio width={400} controls id='audio'>
                         <source src={src}></source>
                     </audio>
-                    <EmotionLineChart></EmotionLineChart>
+                    <EmotionLineChart currentTime={currentTime}></EmotionLineChart>
                     <FreqChart freq={freq} currentTime={currentTime}></FreqChart>
                 </>
             }

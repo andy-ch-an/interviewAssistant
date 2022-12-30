@@ -1,6 +1,6 @@
 import Record from "./component/Record"
 import { Home } from "./component/Home"
-import { QuestionBank } from "./component/QuestionBank";
+import { QuestionBank } from "./component/QuestionBank"
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import FaceApi from "./component/FaceApi"
 import Loader from "./component/Loader"
@@ -13,9 +13,9 @@ function App() {
         <Routes>
           <Route exact path="/" element={<Home/>}/>
           <Route exact path="/QuestionBank" element={<QuestionBank/>}/>
+          <Route exact path="/instruction" element={<Record />}/>
         </Routes>
       </Router>
-      {/* <FaceApi></FaceApi> */}
       {/* <Loader></Loader> */}
       {/* <EmotionLineChart></EmotionLineChart> */}
     </>

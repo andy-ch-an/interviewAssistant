@@ -10,7 +10,10 @@ module.exports = {
       xl: '1440px',
     },
     fontFamily: {
-      'HankRnd': ['HankRnd', 'mono'],
+      'HankRndBlack': ['HankRndBlack', 'mono'],
+      'HankRndLight': ['HankRndLight', 'mono'],
+      'HankRndRegular': ['HankRndRegular', 'mono'],
+      'HankRndBold': ['HankRndBold', 'mono']
     },
     extend: {
       width: {
@@ -23,7 +26,8 @@ module.exports = {
         lightestBlue: '#E7EEFB',
         lightRed: '#EF9A9A',
         gray: '#687284',
-        background: '#F7F8FA'
+        darkerGray: '#565656',
+        background: '#F7F8FA',
       },
     },
   },
