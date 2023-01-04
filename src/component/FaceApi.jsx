@@ -38,7 +38,7 @@ const FaceApi = ()=>{
             dataArray.push(resizedDetections);
             console.log(resizedDetections)
           }
-    },950 )
+    }, 950)
     await new Promise(resolve => setTimeout(resolve, 4000));
     clearInterval(interval)
 }

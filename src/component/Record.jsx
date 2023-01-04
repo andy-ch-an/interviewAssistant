@@ -77,19 +77,6 @@ const Record = () => {
                 console.log('analysed');
             };
             await offline.startRendering();
-            
-
-
-
-            // const message = await S3.upload(params).promise()
-            // console.log(message)
-            // const a = document.createElement("a");
-            // document.body.appendChild(a);
-            // a.style = "display: none";
-            // a.href = url;
-            // a.download = "test.webm";
-            // a.click();
-            // window.URL.revokeObjectURL(url);
         }
         console.log(e)
     }
@@ -104,7 +91,7 @@ const Record = () => {
                 video.srcObject = stream
                 mediaRecorder.ondataavailable = handleDataAvailable;
                 mediaRecorder.start()
-                await new Promise(resolve => setTimeout(resolve, 120000));
+                await new Promise(resolve => setTimeout(resolve, 4000));
                 mediaRecorder.stop()
                 setIsFinish(true)
                 stream.getTracks().forEach((track) => track.stop())
@@ -128,9 +115,8 @@ const Record = () => {
             }
             {isRecord && !isFinish && <>
                 <video ref={videoRef} className="m-auto mt-[calc((100vh-480px)/2)]" autoPlay muted></video>
-                {/* <canvas></canvas> */}
+                <canvas></canvas>
                 <FaceApi/>
-                <button>Done!</button>
             </>
             }
             {isFinish && /*<Loader></Loader>*/
