@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useLayoutEffect } from "react"
 import '../../init'
+import { IconContext } from "react-icons";
+import {BsRecordCircle} from 'react-icons/bs'
 import Loader from './Loader'
 import FaceApi from "./FaceApi"
 import { v4 } from 'uuid'
@@ -13,32 +15,31 @@ AWS.config.update({
 })
 
 const Record = () => {
-    const [start, setStart] = useState(false)
-    const [count, setCount] = useState(1)
-    const [isRecord, setIsRecord] = useState(false)
-    const [isFinish, setIsFinish] = useState(false)
-    const videoRef = useRef()
-    const [src, setSrc] = useState()
-    const [currentTime, setCurrentTime] = useState(0)
-    const S3 = new AWS.S3({ region: "ap-southeast-1" })
-    let audioScr = useRef()
-    let audioContext = new (window.AudioContext || window.webkitAudioContext)()
-    const [freq, setFreq] = useState([])
-    // let analyser = audioContext.createAnalyser();
+    const videoRef = useRef();
+    const [src, setSrc] = useState();
+    const [Recording, setRecording] = useState(false);
+    const [timer, setTimer] = useState(60)
+    const S3 = new AWS.S3({ region: "ap-southeast-1" });
+    let audioScr = useRef();
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const [freq, setFreq] = useState([]);
+    const [buttonColor, setButtonColor] = useState("Black");
+    const [startRecording, setStartRecoding] = useState(false);
 
+    const threeQuestions = [
+        "What is your name?",
+        "What are your skills?",
+        "Why are you interested for this job?"
+    ]
 
-    useEffect(() => {
-        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-    }, [])
-    useEffect(() => {
-        (count > 0 && start) && setTimeout(() => {
-            setCount(preCount => preCount - 1)
-        }, 1000);
-        if (count === 0) {
-            setIsRecord(true)
-            console.log('start recording')
-        }
-    }, [count, start])
+    function invokeRecording() {
+        setRecording(prev => !prev)
+    }
+    function toggleButton() {
+        setButtonColor(Recording ?  "Black": "Red");
+        console.log(buttonColor);
+    }
+
 
     const handleDataAvailable = async (e) => {
         if (e.data.size) {
@@ -80,58 +81,84 @@ const Record = () => {
         }
         console.log(e)
     }
+
+    let mediaRecordRef = useRef();
+    let streamRef = useRef();
+
     useEffect(() => {
-        if (isRecord) {
-            const canvas = document.querySelector("canvas")
-            const stream = canvas.captureStream(25)
-            const option = { mimeType: "video/webm; codecs=vp9" }
-            navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(async (stream) => {
-                const mediaRecorder = new MediaRecorder(stream, option)
-                let video = videoRef.current
-                video.srcObject = stream
-                mediaRecorder.ondataavailable = handleDataAvailable;
-                mediaRecorder.start()
-                await new Promise(resolve => setTimeout(resolve, 4000));
-                mediaRecorder.stop()
-                setIsFinish(true)
-                stream.getTracks().forEach((track) => track.stop())
-                console.log('finish recording')
-            })
+        const canvas = document.querySelector("canvas")
+        const stream = canvas.captureStream(25)
+        const option = { mimeType: "video/webm; codecs=vp9" }
+        navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(async (stream) => {
+            const mediaRecorder = new MediaRecorder(stream, option)
+            let video = videoRef.current
+            video.srcObject = stream
+            mediaRecorder.ondataavailable = handleDataAvailable;
+            console.log('start recording')
+            mediaRecordRef.current = mediaRecorder;
+            // mediaRecorder.start()
+            // await new Promise(resolve => setTimeout(resolve, 5000));
+            // mediaRecorder.stop();
+            console.log('finish recording')
+            streamRef.current = stream;
+            
+        })
+    }, [])
+
+    useLayoutEffect(()=>{
+        if(Recording){
+            
+            mediaRecordRef.current.start();
+            console.log(mediaRecordRef.current)
         }
-    }, [isRecord])
+    }, [Recording])
+    useLayoutEffect(()=>{
+        if(startRecording && !Recording){
+            mediaRecordRef.current.stop();
+            streamRef.current.getTracks().forEach((track) => track.stop());
+        }
+    }, [startRecording, Recording])
+
+    useEffect(() => {
+        if(Recording)
+        {
+            if (!timer){
+                setRecording(false);
+            }
+            const intervalId = setInterval(() => {
+            setTimer(timer - 1);
+            }, 1000);
+            return () => clearInterval(intervalId);
+        }
+      }, [Recording, timer]);
 
 
     return (
-        <>
-            {!start && <>
-                <h2 className="text-3xl text-center m-10">Instruction</h2>
-                <p className="text-xl mt-3 w-[65%] m-auto">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Delectus quaerat reiciendis maiores nostrum tempore dolorum, iusto rem, adipisci architecto totam ipsa possimus. Eius, quisquam! Modi aspernatur, exercitationem unde aliquam iusto ex numquam, odit maxime consectetur dolore molestias rem ratione voluptatem nemo quia. Eius minus itaque, veritatis corporis quod voluptatibus maiores delectus totam quos ad atque ratione eaque vitae at nihil non provident nulla officiis adipisci. Sed aut odio nemo et eligendi est laboriosam quas suscipit dolores, quod voluptatibus ipsa vel eum? Distinctio culpa molestiae quia accusamus, molestias incidunt cumque nesciunt ea quibusdam modi nulla neque, dolore enim tempore! Veritatis, ad. </p>
-                <button onClick={() => setStart(true)} className="rounded-md bg-sky-600 py-2 px-3 text-[0.8125rem] font-semibold leading-5 text-white hover:bg-sky-500 mt-3 m-auto block">Start</button>
-            </>}
-            {start && !isRecord &&
-                <div className="h-[100vh] text-center align-middle text-9xl leading-[100vh]">
-                    {count}
+        <div className="bg-background relative">
+            <nav className="relative mx-auto p-5 bg-white h-[10vh] box-border">
+                <img src="logo.svg" alt="logo" className="cursor-pointer absolute top-0 bottom-0 m-auto" onClick= {()=>navigate("/")}/>
+                <div className="flex font-HankRndBold justify-center tracking-widest text-transparent text-3xl bg-clip-text bg-gradient-to-r from-lightBlue to-lightPurple">
+                    interview hackers
                 </div>
-            }
-            {isRecord && !isFinish && <>
-                <video ref={videoRef} className="m-auto mt-[calc((100vh-480px)/2)]" autoPlay muted></video>
-                <canvas></canvas>
-                <FaceApi/>
-            </>
-            }
-            {isFinish && /*<Loader></Loader>*/
-                <>
-                    <video width={400} controls id='recording' onTimeUpdate={e => setCurrentTime(e.target.currentTime)}>
-                        <source src={src} type='video/webm'></source>
-                    </video>
-                    <audio width={400} controls id='audio'>
-                        <source src={src}></source>
-                    </audio>
-                    <EmotionLineChart currentTime={currentTime}></EmotionLineChart>
-                    <FreqChart freq={freq} currentTime={currentTime}></FreqChart>
-                </>
-            }
-        </>
+            </nav>
+            <div className="flex flex-col gap-y-[50px] pt-[40px] h-[90vh]  items-center pb-[20px] ">
+                <div className="font-HankRndRegular text-[30px] w-[800px] border-darkerGray py-[15px] border-[1px] text-center bg-white rounded-[10px] ">What is Your Name</div>
+                <div className="flex">
+                    <video ref={videoRef} autoPlay muted className="rounded-[10%] h-auto w-[600px]" />
+                    <canvas className="absolute"/>
+                    <FaceApi/>
+                </div>
+                <div className="flex w-[100vw] relative justify-center items-center">
+                    <IconContext.Provider value={{ color: buttonColor }}>
+                        <button onClick={()=>{invokeRecording(); toggleButton(); setStartRecoding(true);}}>
+                            <BsRecordCircle className="h-[50px] w-auto bg-red" />
+                        </button>
+                    </IconContext.Provider>
+                    <div className="absolute right-10 font-HankRndRegular">{`Time Left: ${timer}`}</div>
+                </div>
+                
+            </div>
+        </div> 
     )
 }
 export default Record

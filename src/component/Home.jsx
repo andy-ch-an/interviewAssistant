@@ -32,33 +32,33 @@ export const Home = () => {
   ]
   const outputAnimations = animationArray.map((item)=>{
     return(
-      <div key={item.id} class="flex flex-col gap-y-2 mx-auto w-32">
-        <Lottie class="w-[40px] mx-auto" animationData={item.name} />
-        {item.id===1? <div class="text-s text-center leading-[17px]">{item.text}</div> : <div class="text-s text-center leading-[17px] w-[80px] mx-auto ">{item.text}</div>}
+      <div key={item.id} className="flex flex-col gap-y-2 mx-auto w-32">
+        <Lottie className="w-[40px] mx-auto" animationData={item.name} />
+        {item.id===1? <div className="text-s text-center leading-[17px]">{item.text}</div> : <div className="text-s text-center leading-[17px] w-[80px] mx-auto ">{item.text}</div>}
       </div>
     );
   })
   return (
     <>
       {/* navbar */}
-      <div class="bg-background h-screen">
-      <nav class="relative mx-auto p-5 bg-white">
-            <img src="logo.svg" alt="logo" class="absolute top-0 bottom-0 m-auto" onClick= {()=>navigate("/Record")}/>
-            <div class="flex font-HankRndBold justify-center tracking-widest text-transparent text-3xl bg-clip-text bg-gradient-to-r from-lightBlue to-lightPurple">
+      <div className="bg-background h-screen">
+      <nav className="relative mx-auto p-5 bg-white h-[10vh] box-border">
+            <img src="logo.svg" alt="logo" className="cursor-pointer absolute top-0 bottom-0 m-auto" onClick= {()=>navigate("/")}/>
+            <div className="flex font-HankRndBold justify-center tracking-widest text-transparent text-3xl bg-clip-text bg-gradient-to-r from-lightBlue to-lightPurple">
                 interview hackers
             </div>
         </nav>
         {/* body */}
-        <section id="body" class="font-HankRndRegular">
+        <section id="body" className="font-HankRndRegular">
             {/* Flex container */}
-            <div class="container flex-col mx-auto mt-40">
-                <div class="tracking-semibold font-semibold text-[72px] text-center text-gray">
+            <div className="container flex-col mx-auto mt-40">
+                <div className="tracking-semibold font-semibold text-center text-gray text-[48px] sm:text-[50px] md:text-[64px] lg:text-[72px]">
                     Hack your interview.
                 </div>
-                <div class="text-[32px] font-semibold text-center mt-3 text-darkerGray">
-                    Practice Face to Face <a class="text-cyanBlue bg-lightestBlue p-1">Banking</a> Interview with Artificial Intelligence
+                <div className="font-semibold text-center mt-3 text-darkerGray text-[20px] sm:text-[25px] md:text-[29px] lg:text-[32px]">
+                    Practice Face to Face <a className="text-cyanBlue bg-lightestBlue p-1">Banking</a> Interview with Artificial Intelligence
                 </div>
-                <div class="flex flex-row px-80 mt-12">
+                <div className="flex flex-row mt-12 justify-center lg:px-[150px] xl:px-[350px]">
                     {outputAnimations}
                 </div>
             </div>
