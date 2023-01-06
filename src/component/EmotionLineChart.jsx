@@ -1,4 +1,5 @@
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState} from "react"
+import { dataArray  } from "./FaceApi"
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -11,6 +12,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2'
 import faker from 'faker'
+
 
 
 ChartJS.register(
@@ -44,40 +46,40 @@ export const options = {
         },
     },
 };
-const labels = ['1', '2', '3', '4', '5', '6', '7','8','9','10'];
-export const data = {
+const EmotionLineChart = ({currentTime}) => {
+  const labels = [];
+  for(let i = 0; i< 4; i++){
+    labels.push(Math.floor(currentTime+i))
+  }
+
+  const dataArray2 = dataArray.map((data) => (data[0].detection._score*100));
+  console.log(dataArray2);
+   const data = {
     labels,
     datasets: [
       {
         label: 'Neutral',
-        data: [10,20,30,20,50,20,10,11,0,12],
+        data: dataArray.map((data) => ((data[0].expressions.neutral)*100)),
         borderColor: 'rgb(142,145,143)',
         cubicInterpolationMode: 'monotone',
         backgroundColor: 'rgba(142,145,143, 0.5)',
       },
       {
-        label: 'Positive',
-        data: labels.map(() => faker.datatype.number({ min: 0, max: 100 })),
+        label: 'Negative',
+        data: dataArray.map((data) => ((data[0].expressions.disgusted+ data[0].expressions.angry + data[0].expressions.fearful +  data[0].expressions.sad)*100)),
         borderColor: 'rgb(249,93,106)',
         backgroundColor: 'rgba(249,93,106, 0.5)',
         cubicInterpolationMode: 'monotone',
       },
       {
-        label: 'Negative',
-        data: labels.map(() => faker.datatype.number({ min: 0, max: 100 })),
+        label: 'Positive',
+        data: dataArray.map((data) => ((data[0].expressions.happy+ data[0].expressions.surprised)*100)),
         borderColor: 'rgb(47, 75, 124)',
         backgroundColor: 'rgba(47, 75, 124, 0.5)',
         cubicInterpolationMode: 'monotone',
       },
     ],
   };
-const EmotionLineChart = () => {
-    const [chartData, setChartData] = useState(
-        [{ time: 0, energy: 12 },
-        { time: 1, energy: 15 },
-        { time: 2, energy: 10 },
-        { time: 3, energy: 18 }]
-    )
 
     return (
         <div className="w-[40%]">
