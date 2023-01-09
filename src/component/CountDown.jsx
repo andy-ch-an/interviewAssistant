@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-function CountDown() {
+function CountDown(props) {
   const [count, setCount] = useState(3);
   useEffect(()=>{
+    if(!count){
+      props.toggleStartCountDown(prev=>!prev);
+      props.toggleStartVid(true);
+    }
     setTimeout(()=>{setCount(prev=>prev-1)}, 1000)
   }, [count])
   return (
