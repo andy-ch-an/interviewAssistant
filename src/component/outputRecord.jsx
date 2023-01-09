@@ -1,6 +1,17 @@
 import React from 'react'
+import axios from 'axios'
 
-export const outputRecord = () => {
+const OutputRecord = () => {
+  const obj = {
+
+  }
+  async () =>{
+    try {
+      const response = axios.post('https://ip32juena3.execute-api.ap-southeast-1.amazonaws.com/default/speechToText')
+    } catch (error) {
+      
+    }
+  }
   return (
     <>
       <video width={400} controls id='recording' onTimeUpdate={e => setCurrentTime(e.target.currentTime)}>
@@ -14,3 +25,5 @@ export const outputRecord = () => {
     </>
   )
 }
+
+export default OutputRecord;

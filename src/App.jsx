@@ -8,6 +8,7 @@ import Loader from "./component/Loader"
 import EmotionLineChart from "./component/EmotionLineChart"
 import Instruction from "./component/Instruction";
 import CountDown from "./component/CountDown";
+import OutputRecord from "./component/outputRecord";
 
 function App() {
   return(
@@ -20,6 +21,7 @@ function App() {
           <Route exact path="/Record" element={<Record />}/>    
           <Route exact path="/Record" element={<Instruction/>}/> 
           <Route exact path="/Count" element={<CountDown />}/> 
+          <Route exact path="/OutputRecord" element={<OutputRecord />} />
         </Routes>
       </Router>
       {/* <Loader></Loader> */}

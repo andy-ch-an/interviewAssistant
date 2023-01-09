@@ -3,9 +3,11 @@ import * as  faceapi from 'face-api.js'
 import './FaceApi.css'
 import { data } from 'autoprefixer';
 
-export const dataArray = [];
+export const dataArray = [
+ [],[],[] 
+];
 
-const FaceApi = ()=>{
+const FaceApi = ({questionIndex})=>{
   const videoRef = useRef()
   const canvasRef = useRef()
   const videoHight = 0
@@ -35,7 +37,7 @@ const FaceApi = ()=>{
           const resizedDetections = faceapi.resizeResults(detections, { width: 720, height: 540 });
           canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.width, canvasRef.height)
           if(resizedDetections.length){
-            dataArray.push(resizedDetections);
+            dataArray[questionIndex].push(resizedDetections);
             console.log(resizedDetections)
           }
     }, 950)
